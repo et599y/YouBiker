@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Simple Map</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="" href="style.css">
+    <script src="map.js"></script>
+  </head>
+  <body>
+    <div id="header">
+      <img src="image/YouBike.png" alt="" id="logo">
+      <div id="search">
+        <input type="textbox" >
+        <button>搜尋</button>
+      </div>
+      <div id="btns">
+        <div class="transpic">繁</div>
+      </div>
+    </div>
+    <div id="map"></div>
+    <div style="float:right;width:30%;height:75%;overflow:auto"> 
+      <p id="pathname">路徑規劃</p>
+      <div id="directions_panel" style="width:100%"></div>
+      </div>
+  </body>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAKYZjLxTu8CUNyu9-18ruaytjXdg9SDfc&callback=initMap"
+    async defer></script>
+  
+</html>
