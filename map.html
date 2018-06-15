@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Simple Map</title>
+    <title>YouBiker Map</title>
     <meta name="viewport" content="initial-scale=1.0">
     <meta charset="utf-8">
     <link rel="stylesheet" type="" href="style.css">
@@ -15,7 +15,9 @@
         <button>搜尋</button>
       </div>
       <div id="btns">
-        <div class="transpic">繁</div>
+        <div class="transpic" style="border: 3px dashed #b0c81c;" onclick="toTaiwanese()">繁</div>
+        <div class="transpic" style="border: 3px dashed #4bbedd;" onclick="toChinese()">簡</div>
+        <div class="transpic" style="border: 3px dashed #e73827;" onclick="toEnglish()">英</div>
       </div>
     </div>
     <div id="map"></div>
