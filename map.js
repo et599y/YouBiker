@@ -14,7 +14,13 @@ var directionsService;
 var oldDirections = [];
 var currentDirections = null;
 
-var language= "繁";
+var language= "繁"; //預設繁體
+var tagname={
+    name: "站點名稱",
+    location: "站點位置",
+    btnname: "規劃路徑"
+};
+
 
 //初始化地圖
 function initMap() {
@@ -58,7 +64,7 @@ function initMap() {
     $.get('http://opendata.hccg.gov.tw/dataset/1f334249-9b55-4c42-aec1-5a8a8b5e07ca/resource/4d5edb22-a15e-4097-8635-8e32f7db601a/download/20180212143756340.json', function(stationRecord){
         console.log(stationRecord)
         Rdata = stationRecord;
-        setMarkers(map, Rdata);
+        setMarkers(map, Rdata, tagname);
     });  
 
     //路徑規劃
@@ -89,7 +95,7 @@ function Getposition() {
 }
 
 //點位
-function setMarkers(map, locations){
+function setMarkers(map, locations, tagname){
     var i;
     for(i=0; i<locations.length; i++){
         var loan = locations[i]['站點名稱']
@@ -105,7 +111,7 @@ function setMarkers(map, locations){
 
         markers.push(marker);
 
-        var content = "<h3>站點名稱: " + loan +  '</h3>' + "站點位置: " + add + "<br><br><button onclick=" + "calcRoute('" + loan + "')"+ ">規劃路徑</button>"    
+        var content = "<h3>" + tagname.name + ": " + loan +  '</h3>' + tagname.location + ": " + add + "<br><br><button onclick=" + "calcRoute('" + loan + "')"+ ">" + tagname.btnname + "</button>"    
         var infowindow = new google.maps.InfoWindow()
 
         google.maps.event.addListener(marker,'click', (function(marker,content,infowindow){ 
@@ -145,47 +151,78 @@ function setMapOnAll() {
     markers = [];
 }
 
+
 //多語系
 function toChinese(){
-    setMapOnAll();
-    console.log(Rdata)
+    
     //繁轉簡
-    var state=false;
     if(language == "繁"){
+        setMapOnAll();
+        console.log(Rdata)
         for(var x=0;x<Rdata.length;x++){
             console.log(Rdata[x]['站點名稱']);
-            // $.ajax({
-            //     url: "http://www.webxml.com.cn/WebServices/TraditionalSimplifiedWebService.asmx/toSimplifiedChinese?sText=站點名稱",
-            //     type: "GET",
-            //     dataType: 'jsonp',
-            //     success: function(data){
-            //         console.log("data", data);
-            //     }
-            //   });
             (function(index){
                 $.get("https://cors.io/?http://www.webxml.com.cn/WebServices/TraditionalSimplifiedWebService.asmx/toSimplifiedChinese?sText=" + Rdata[x]['站點名稱'], function(data){
-                    // data = data.replace(//, "");
-
-                    console.log("data", data);
-                    Rdata[index]['站點名稱'] = data;
+                    
+                    // console.log("data", $($.parseXML(data)).find("string").text());
+                    Rdata[index]['站點名稱'] = $($.parseXML(data)).find("string").text();
                 });
 
                 $.get("https://cors.io/?http://www.webxml.com.cn/WebServices/TraditionalSimplifiedWebService.asmx/toSimplifiedChinese?sText=" + Rdata[x]['站點位置'], function(data){
-                    console.log("data2", data);
-                    Rdata[index]['站點位置'] = data;
-                    state = true;
+                    // console.log("data2", $($.parseXML(data)).find("string").text());
+                    Rdata[index]['站點位置'] = $($.parseXML(data)).find("string").text();
                 });
             })(x);
-            
-            
-            
-        }   
+        }    
         
-        if(state == true){
-            language = "簡";
-            setMarkers(map, Rdata);
-            console.log("setmark")
-        }
-        
+        //設定
+        setTimeout(
+            function checkState(state){
+                language = "簡";
+                tagname.name = "站点名称";
+                tagname.location = "站点位置";
+                tagname.btnname = "规划路径";
+                setMarkers(map, Rdata, tagname);
+                // console.log("setmark")
+            }, 25000
+        );
     }
 }
+
+function toTaiwanese(){
+    
+    //簡轉繁
+    if(language == "簡"){
+        setMapOnAll();
+        for(var x=0;x<Rdata.length;x++){
+            console.log(Rdata[x]['站點名稱']);
+            (function(index){
+                $.get("https://cors.io/?http://www.webxml.com.cn/WebServices/TraditionalSimplifiedWebService.asmx/toTraditionalChinese?sText=" + Rdata[x]['站點名稱'], function(data){
+                    
+                    // console.log("data", $($.parseXML(data)).find("string").text());
+                    Rdata[index]['站點名稱'] = $($.parseXML(data)).find("string").text();
+                });
+
+                $.get("https://cors.io/?http://www.webxml.com.cn/WebServices/TraditionalSimplifiedWebService.asmx/toTraditionalChinese?sText=" + Rdata[x]['站點位置'], function(data){
+                    // console.log("data2", $($.parseXML(data)).find("string").text());
+                    Rdata[index]['站點位置'] = $($.parseXML(data)).find("string").text();
+                });
+            })(x);
+        }    
+        
+        //設定
+        setTimeout(
+            function checkState(state){
+                language = "繁";
+                tagname.name = "站點名稱";
+                tagname.location = "站點位置";
+                tagname.btnname = "規劃路徑";
+                setMarkers(map, Rdata, tagname);
+                // console.log("setmark")
+            }, 25000
+        );
+    }
+}
+
+
+
