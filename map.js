@@ -3,6 +3,8 @@ var centerMark = {
     lat: 24.803049,
     lng: 120.972016
 };
+var infowindow;
+var content=[];
 //標籤
 var markers=[];
 var lastWindow=null;
@@ -104,24 +106,27 @@ function setMarkers(map, locations, tagname){
         var add =  locations[i]['站點位置']
 
         latlngset = new google.maps.LatLng(lat, long);
+        content[i] = "<h3>" + tagname.name + ": " + loan +  '</h3>' + tagname.location + ": " + add + "<br><br><button onclick=" + "calcRoute('" + loan + "')"+ ">" + tagname.btnname + "</button>";
 
         var marker = new google.maps.Marker({  
-          map: map, title: loan , position: latlngset , icon: 'image/icon.png'
+          map: map, title: loan , position: latlngset , icon: 'image/icon.png', content: content[i]
         });
 
         markers.push(marker);
 
-        var content = "<h3>" + tagname.name + ": " + loan +  '</h3>' + tagname.location + ": " + add + "<br><br><button onclick=" + "calcRoute('" + loan + "')"+ ">" + tagname.btnname + "</button>"    
-        var infowindow = new google.maps.InfoWindow()
+        
+        infowindow = new google.maps.InfoWindow({
+            content: content[i]
+        });
 
         google.maps.event.addListener(marker,'click', (function(marker,content,infowindow){ 
             return function() {
-                infowindow.setContent(content); //放入iffo文字
+                //infowindow.setContent(content); //放入iffo文字
                 if (lastWindow) lastWindow.close(); //其餘info關閉
                 infowindow.open(map, marker); //新的info打開
                 lastWindow=infowindow;
             };
-        })(marker,content,infowindow)); 
+        })(marker,content[i],infowindow)); 
   }
 }
 
@@ -139,7 +144,6 @@ function calcRoute(pEnd) {
         directionsDisplay.setDirections(response);
       }
     });
-		
 }
 
 //清空標記
@@ -224,5 +228,37 @@ function toTaiwanese(){
     }
 }
 
-
+//搜尋站點
+function searchmark(){
+    var check = false;
+    var s = $("#textboxClass").val();
+    if(s == ""){
+        alert("請輸入搜尋名稱");
+    }
+    else{
+        for(var a=0;a<Rdata.length;a++){
+            if(Rdata[a]['站點名稱'] == s){
+                for(var m =0;m<markers.length;m++){
+                    if(markers[m].title == Rdata[a]['站點名稱']){
+                        console.log("center", Rdata[a]['站點名稱'])
+                        console.log(markers)
+                        var latLng = new google.maps.LatLng(Rdata[a]['緯度'], Rdata[a]['經度']);
+                        map.setCenter(latLng);
+                        infowindow.close(); //其餘info關閉
+                        infowindow = new google.maps.InfoWindow({
+                            content: markers[m].content
+                        });
+                        infowindow.open(map, markers[m]);
+                    }
+                }              
+                check = true;
+                break;
+            }
+        }
+        if(check == false){
+            alert("查無此結果");
+        }
+    }
+    check = false;
+}
 
