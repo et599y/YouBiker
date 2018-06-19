@@ -3,12 +3,28 @@ var centerMark = {
     lat: 24.803049,
     lng: 120.972016
 };
+var infowindow;
+var content=[];
+//標籤
+var markers=[];
 var lastWindow=null;
+//站點資料
+var Rdata;
 
 var directionsDisplay;
 var directionsService;
 var oldDirections = [];
 var currentDirections = null;
+
+var language= "繁"; //預設繁體
+var tagname={
+    name: "站點名稱",
+    location: "站點位置",
+    btnname: "規劃路徑"
+};
+
+//key
+let subscriptionKey = 'f8261c1fa94d41ce9b5765ade746d6d9';
 
 //初始化地圖
 function initMap() {
@@ -51,7 +67,8 @@ function initMap() {
     //取得站點資料   
     $.get('http://opendata.hccg.gov.tw/dataset/1f334249-9b55-4c42-aec1-5a8a8b5e07ca/resource/4d5edb22-a15e-4097-8635-8e32f7db601a/download/20180212143756340.json', function(stationRecord){
         console.log(stationRecord)
-        setMarkers(map, stationRecord);
+        Rdata = stationRecord;
+        setMarkers(map, Rdata, tagname);
     });  
 
     //路徑規劃
@@ -82,8 +99,8 @@ function Getposition() {
 }
 
 //點位
-function setMarkers(map, locations){
-    var marker, i;
+function setMarkers(map, locations, tagname){
+    var i;
     for(i=0; i<locations.length; i++){
         var loan = locations[i]['站點名稱']
         var lat = parseFloat(locations[i]['緯度'])
@@ -91,22 +108,27 @@ function setMarkers(map, locations){
         var add =  locations[i]['站點位置']
 
         latlngset = new google.maps.LatLng(lat, long);
+        content[i] = "<h3>" + tagname.name + ": " + loan +  '</h3>' + tagname.location + ": " + add + "<br><br><button onclick=" + "calcRoute('" + loan + "')"+ ">" + tagname.btnname + "</button>";
 
         var marker = new google.maps.Marker({  
-          map: map, title: loan , position: latlngset , icon: 'image/icon.png'
+          map: map, title: loan , position: latlngset , icon: 'image/icon.png', content: content[i]
         });
 
-        var content = "<h3>站點名稱: " + loan +  '</h3>' + "站點位置: " + add + "<br><br><button onclick=" + "calcRoute('" + loan + "')"+ ">規劃路徑</button>"    
-        var infowindow = new google.maps.InfoWindow()
+        markers.push(marker);
+
+        
+        infowindow = new google.maps.InfoWindow({
+            content: content[i]
+        });
 
         google.maps.event.addListener(marker,'click', (function(marker,content,infowindow){ 
             return function() {
-                infowindow.setContent(content); //放入iffo文字
+                //infowindow.setContent(content); //放入iffo文字
                 if (lastWindow) lastWindow.close(); //其餘info關閉
                 infowindow.open(map, marker); //新的info打開
                 lastWindow=infowindow;
             };
-        })(marker,content,infowindow)); 
+        })(marker,content[i],infowindow)); 
   }
 }
 
@@ -124,5 +146,157 @@ function calcRoute(pEnd) {
         directionsDisplay.setDirections(response);
       }
     });
-		
 }
+
+//清空標記
+function setMapOnAll() {
+    for (var i = 0; i < markers.length; i++) {
+        markers[i].setMap(null);
+        console.log("remove")
+    }
+    markers = [];
+}
+
+
+//多語系
+function toChinese(){
+    
+    //繁轉簡
+    if(language == "繁"){
+        setMapOnAll();
+        console.log(Rdata)
+        for(var x=0;x<Rdata.length;x++){
+            console.log(Rdata[x]['站點名稱']);
+            (function(index){
+                $.get("https://cors.io/?http://www.webxml.com.cn/WebServices/TraditionalSimplifiedWebService.asmx/toSimplifiedChinese?sText=" + Rdata[x]['站點名稱'], function(data){
+                    
+                    // console.log("data", $($.parseXML(data)).find("string").text());
+                    Rdata[index]['站點名稱'] = $($.parseXML(data)).find("string").text();
+                });
+
+                $.get("https://cors.io/?http://www.webxml.com.cn/WebServices/TraditionalSimplifiedWebService.asmx/toSimplifiedChinese?sText=" + Rdata[x]['站點位置'], function(data){
+                    // console.log("data2", $($.parseXML(data)).find("string").text());
+                    Rdata[index]['站點位置'] = $($.parseXML(data)).find("string").text();
+                });
+            })(x);
+        }    
+        
+        //設定
+        setTimeout(
+            function checkState(state){
+                language = "簡";
+                tagname.name = "站点名称";
+                tagname.location = "站点位置";
+                tagname.btnname = "规划路径";
+                setMarkers(map, Rdata, tagname);
+                // console.log("setmark")
+            }, 25000
+        );
+    }
+}
+
+function toTaiwanese(){
+    
+    //簡轉繁
+    if(language == "簡"){
+        setMapOnAll();
+        for(var x=0;x<Rdata.length;x++){
+            console.log(Rdata[x]['站點名稱']);
+            (function(index){
+                $.get("https://cors.io/?http://www.webxml.com.cn/WebServices/TraditionalSimplifiedWebService.asmx/toTraditionalChinese?sText=" + Rdata[x]['站點名稱'], function(data){
+                    
+                    // console.log("data", $($.parseXML(data)).find("string").text());
+                    Rdata[index]['站點名稱'] = $($.parseXML(data)).find("string").text();
+                });
+
+                $.get("https://cors.io/?http://www.webxml.com.cn/WebServices/TraditionalSimplifiedWebService.asmx/toTraditionalChinese?sText=" + Rdata[x]['站點位置'], function(data){
+                    // console.log("data2", $($.parseXML(data)).find("string").text());
+                    Rdata[index]['站點位置'] = $($.parseXML(data)).find("string").text();
+                });
+            })(x);
+        }    
+        
+        //設定
+        setTimeout(
+            function checkState(state){
+                language = "繁";
+                tagname.name = "站點名稱";
+                tagname.location = "站點位置";
+                tagname.btnname = "規劃路徑";
+                setMarkers(map, Rdata, tagname);
+                // console.log("setmark")
+            }, 25000
+        );
+    }
+}
+
+let get_guid = function () {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+
+function toEnglish(){
+    // var Testdata = {
+    //     appId: 'f8261c1fa94d41ce9b5765ade746d6d9',
+    //     from: 'en',
+    //     to: 'zh-Hant',
+    //     contentType: 'text/plain',
+    //     text: '我不知道'
+    // };
+    //繁轉英
+    if(language == "繁"){
+        $.ajax({
+            url: "https://cors.io/?http://api.cognitive.microsofttranslator.com/translate?api-version=3.0&to=zh-Hans",
+            method: 'POST',
+            dataType: 'jsonp',
+            Text: 'Hello, world!',
+            headers : {
+                'Content-Type' : 'application/json',
+                'Ocp-Apim-Subscription-Key' : subscriptionKey,
+                'X-ClientTraceId' : get_guid (),
+            }
+        })
+        .done(function (jqXHR, textStatus, errorThrown) {
+            console.log('done', this, jqXHR, textStatus, errorThrown);
+            // show the translation result to the user
+            // $('#txtAjaxOutput').text(jqXHR);
+        });
+    }
+}
+
+//搜尋站點
+function searchmark(){
+    var check = false;
+    var s = $("#textboxClass").val();
+    if(s == ""){
+        alert("請輸入搜尋名稱");
+    }
+    else{
+        for(var a=0;a<Rdata.length;a++){
+            if(Rdata[a]['站點名稱'] == s){
+                for(var m =0;m<markers.length;m++){
+                    if(markers[m].title == Rdata[a]['站點名稱']){
+                        console.log("center", Rdata[a]['站點名稱'])
+                        console.log(markers)
+                        var latLng = new google.maps.LatLng(Rdata[a]['緯度'], Rdata[a]['經度']);
+                        map.setCenter(latLng);
+                        infowindow.close(); //其餘info關閉
+                        infowindow = new google.maps.InfoWindow({
+                            content: markers[m].content
+                        });
+                        infowindow.open(map, markers[m]);
+                    }
+                }              
+                check = true;
+                break;
+            }
+        }
+        if(check == false){
+            alert("查無此結果");
+        }
+    }
+    check = false;
+}
+
