@@ -23,9 +23,6 @@ var tagname={
     btnname: "規劃路徑"
 };
 
-//key
-let subscriptionKey = 'f8261c1fa94d41ce9b5765ade746d6d9';
-
 //初始化地圖
 function initMap() {
     //載入規劃路徑Service
@@ -168,8 +165,7 @@ function toChinese(){
         for(var x=0;x<Rdata.length;x++){
             console.log(Rdata[x]['站點名稱']);
             (function(index){
-                $.get("https://cors.io/?http://www.webxml.com.cn/WebServices/TraditionalSimplifiedWebService.asmx/toSimplifiedChinese?sText=" + Rdata[x]['站點名稱'], function(data){
-                    
+                $.get("https://cors.io/?http://www.webxml.com.cn/WebServices/TraditionalSimplifiedWebService.asmx/toSimplifiedChinese?sText=" + Rdata[x]['站點名稱'], function(data){                    
                     // console.log("data", $($.parseXML(data)).find("string").text());
                     Rdata[index]['站點名稱'] = $($.parseXML(data)).find("string").text();
                 });
@@ -203,14 +199,13 @@ function toTaiwanese(){
         for(var x=0;x<Rdata.length;x++){
             console.log(Rdata[x]['站點名稱']);
             (function(index){
-                $.get("https://cors.io/?http://www.webxml.com.cn/WebServices/TraditionalSimplifiedWebService.asmx/toTraditionalChinese?sText=" + Rdata[x]['站點名稱'], function(data){
-                    
-                    console.log("data", $($.parseXML(data)).find("string").text());
+                $.get("https://cors.io/?http://www.webxml.com.cn/WebServices/TraditionalSimplifiedWebService.asmx/toTraditionalChinese?sText=" + Rdata[x]['站點名稱'], function(data){                  
+                    // console.log("data", $($.parseXML(data)).find("string").text());
                     Rdata[index]['站點名稱'] = $($.parseXML(data)).find("string").text();
                 });
 
                 $.get("https://cors.io/?http://www.webxml.com.cn/WebServices/TraditionalSimplifiedWebService.asmx/toTraditionalChinese?sText=" + Rdata[x]['站點位置'], function(data){
-                    console.log("data2", $($.parseXML(data)).find("string").text());
+                    // console.log("data2", $($.parseXML(data)).find("string").text());
                     Rdata[index]['站點位置'] = $($.parseXML(data)).find("string").text();
                 });
             })(x);
