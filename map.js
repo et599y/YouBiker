@@ -205,12 +205,12 @@ function toTaiwanese(){
             (function(index){
                 $.get("https://cors.io/?http://www.webxml.com.cn/WebServices/TraditionalSimplifiedWebService.asmx/toTraditionalChinese?sText=" + Rdata[x]['站點名稱'], function(data){
                     
-                    // console.log("data", $($.parseXML(data)).find("string").text());
+                    console.log("data", $($.parseXML(data)).find("string").text());
                     Rdata[index]['站點名稱'] = $($.parseXML(data)).find("string").text();
                 });
 
                 $.get("https://cors.io/?http://www.webxml.com.cn/WebServices/TraditionalSimplifiedWebService.asmx/toTraditionalChinese?sText=" + Rdata[x]['站點位置'], function(data){
-                    // console.log("data2", $($.parseXML(data)).find("string").text());
+                    console.log("data2", $($.parseXML(data)).find("string").text());
                     Rdata[index]['站點位置'] = $($.parseXML(data)).find("string").text();
                 });
             })(x);
@@ -227,42 +227,6 @@ function toTaiwanese(){
                 // console.log("setmark")
             }, 25000
         );
-    }
-}
-
-let get_guid = function () {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-    });
-  }
-
-function toEnglish(){
-    // var Testdata = {
-    //     appId: 'f8261c1fa94d41ce9b5765ade746d6d9',
-    //     from: 'en',
-    //     to: 'zh-Hant',
-    //     contentType: 'text/plain',
-    //     text: '我不知道'
-    // };
-    //繁轉英
-    if(language == "繁"){
-        $.ajax({
-            url: "https://cors.io/?http://api.cognitive.microsofttranslator.com/translate?api-version=3.0&to=zh-Hans",
-            method: 'POST',
-            dataType: 'jsonp',
-            Text: 'Hello, world!',
-            headers : {
-                'Content-Type' : 'application/json',
-                'Ocp-Apim-Subscription-Key' : subscriptionKey,
-                'X-ClientTraceId' : get_guid (),
-            }
-        })
-        .done(function (jqXHR, textStatus, errorThrown) {
-            console.log('done', this, jqXHR, textStatus, errorThrown);
-            // show the translation result to the user
-            // $('#txtAjaxOutput').text(jqXHR);
-        });
     }
 }
 
